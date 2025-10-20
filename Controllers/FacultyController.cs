@@ -7,6 +7,9 @@ using System.Collections.Generic;
 
 namespace TutorLiveMentor.Controllers
 {
+    /// <summary>
+    /// Controller for managing faculty-related operations
+    /// </summary>
     public class FacultyController : Controller
     {
         private readonly AppDbContext _context;
@@ -44,9 +47,10 @@ namespace TutorLiveMentor.Controllers
                 // Clear any existing session
                 HttpContext.Session.Clear();
 
-                // Store faculty ID in session
+                // Store faculty ID and department in session
                 HttpContext.Session.SetInt32("FacultyId", faculty.FacultyId);
                 HttpContext.Session.SetString("FacultyName", faculty.Name);
+                HttpContext.Session.SetString("FacultyDepartment", faculty.Department);
 
                 // Force session to be saved immediately
                 await HttpContext.Session.CommitAsync();
@@ -73,6 +77,7 @@ namespace TutorLiveMentor.Controllers
 
             ViewBag.FacultyId = facultyId;
             ViewBag.FacultyName = HttpContext.Session.GetString("FacultyName");
+            ViewBag.FacultyDepartment = HttpContext.Session.GetString("FacultyDepartment");
             
             return View();
         }
@@ -134,11 +139,15 @@ namespace TutorLiveMentor.Controllers
                 return BadRequest();
             }
 
-            // Update properties (removed Department since Faculty doesn't have it)
+            // Update properties including the new Department field
             faculty.Name = model.Name;
             faculty.Email = model.Email;
+            faculty.Department = model.Department;
 
             _context.SaveChanges();
+
+            // Update session with new department info
+            HttpContext.Session.SetString("FacultyDepartment", faculty.Department);
 
             // 🚀 REAL-TIME NOTIFICATION: Notify system of profile update
             await _signalRService.NotifyUserActivity(faculty.Name, "Faculty", "Profile Updated", $"Faculty member updated their profile information");

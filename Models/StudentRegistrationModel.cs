@@ -5,10 +5,12 @@ namespace TutorLiveMentor.Models
     public class StudentRegistrationModel
     {
         [Required]
+        [RegularExpression(@"^[a-zA-Z\s.]+$", ErrorMessage = "Full Name can only contain letters, spaces, and dots")]
         public string FullName { get; set; }
 
         [Required]
         [StringLength(10, MinimumLength = 10, ErrorMessage = "Regd Number must be exactly 10 characters.")]
+        [RegularExpression(@"^[A-Z0-9]+$", ErrorMessage = "Registration number must contain only uppercase letters and numbers")]
         public string RegdNumber { get; set; }
 
         [Required]

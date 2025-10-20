@@ -1,0 +1,289 @@
+@model TutorLiveMentor.Models.AdminLoginViewModel
+
+@{
+    ViewBag.Title = "Admin Login";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Login - TutorLiveMentor</title>
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:700,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <style>
+        :root {
+            --royal-blue: #274060;
+            --warm-gold: #FFC857;
+            --cream: #F9FAF2;
+            --slate: #CED3DC;
+            --card-shadow: rgba(39,64,96,0.13);
+            --success-green: #28a745;
+            --error-red: #dc3545;
+            --admin-orange: #fd7e14;
+            --admin-dark: #e8590c;
+        }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            font-family: 'Montserrat', Arial, sans-serif;
+            background: linear-gradient(rgba(249, 250, 242, 0.15), rgba(255, 200, 87, 0.10)),
+            url('@Url.Content("~/images/RGMCET-BACKGROUND.jpg")') center center/cover no-repeat fixed;
+            position: relative;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 0;
+            display: block;
+            background: linear-gradient(135deg, var(--cream) 60%, var(--warm-gold) 100%);
+            opacity: 0.20;
+            pointer-events: none;
+        }
+
+        .glass-card {
+            background: rgba(249,250,242,0.92);
+            box-shadow: 0 16px 48px var(--card-shadow);
+            border-radius: 26px;
+            padding: 50px 40px 40px 40px;
+            text-align: center;
+            backdrop-filter: blur(12px);
+            max-width: 420px;
+            width: 90vw;
+            margin: 120px auto 0 auto;
+            position: relative;
+            z-index: 1;
+            border: 2px solid var(--slate);
+        }
+
+        .logo {
+            width: 70px;
+            height: 70px;
+            margin-bottom: 20px;
+            filter: drop-shadow(2px 6px 18px var(--royal-blue));
+            object-fit: contain;
+            background: var(--cream);
+            border-radius: 12px;
+            padding: 6px;
+        }
+
+        h2 {
+            font-size: 1.9em;
+            font-weight: 700;
+            color: var(--royal-blue);
+            margin-bottom: 30px;
+            letter-spacing: 1px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            color: var(--royal-blue);
+            margin-bottom: 8px;
+            font-size: 0.95em;
+        }
+
+        input[type="email"], input[type="password"], input[type="text"] {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid var(--slate);
+            border-radius: 12px;
+            font-size: 1em;
+            font-family: 'Montserrat', sans-serif;
+            background: rgba(249,250,242,0.8);
+            transition: border-color 0.3s, box-shadow 0.3s;
+            box-sizing: border-box;
+        }
+
+        input[type="email"]:focus, input[type="password"]:focus, input[type="text"]:focus {
+            outline: none;
+            border-color: var(--admin-orange);
+            box-shadow: 0 0 0 3px rgba(253, 126, 20, 0.2);
+        }
+
+        .password-container {
+            position: relative;
+            display: block;
+        }
+
+        .password-container input {
+            width: 100%;
+            padding-right: 45px; /* Make room for the eye icon */
+            box-sizing: border-box;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 18px;
+            z-index: 2;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--admin-orange);
+        }
+
+        .glass-btn {
+            width: 100%;
+            background: linear-gradient(90deg, var(--admin-orange) 74%, var(--warm-gold) 100%);
+            color: #fff;
+            border: none;
+            border-radius: 15px;
+            padding: 16px 24px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 8px 24px var(--card-shadow);
+            border: 2px solid var(--slate);
+            transition: all 0.3s ease;
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .glass-btn:hover {
+            box-shadow: 0 16px 32px rgba(253, 126, 20, 0.4);
+            background: linear-gradient(90deg, var(--warm-gold) 62%, var(--admin-orange) 100%);
+            color: var(--royal-blue);
+            transform: translateY(-3px);
+            border: 2px solid var(--admin-orange);
+        }
+
+        .validation-summary {
+            background: rgba(220, 53, 69, 0.1);
+            border: 1px solid var(--error-red);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 20px;
+            color: var(--error-red);
+            text-align: left;
+        }
+
+        .field-validation-error {
+            color: var(--error-red);
+            font-size: 0.85em;
+            margin-top: 5px;
+            display: block;
+        }
+
+        .nav-link {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(249,250,242,0.9);
+            color: var(--royal-blue);
+            padding: 8px 16px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-weight: 600;
+            border: 1px solid var(--slate);
+            backdrop-filter: blur(8px);
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover {
+            background: var(--warm-gold);
+            color: var(--royal-blue);
+            transform: translateY(-2px);
+            text-decoration: none;
+        }
+
+        .admin-icon {
+            font-size: 3em;
+            margin-bottom: 10px;
+            color: var(--admin-orange);
+        }
+
+        @@media (max-width: 768px) {
+            .glass-card {
+                margin: 60px auto 0 auto;
+                padding: 40px 25px 30px 25px;
+            }
+
+            h2 {
+                font-size: 1.6em;
+            }
+
+            .nav-link {
+                position: static;
+                margin-bottom: 20px;
+                display: inline-block;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="@Url.Action("Index", "Home")" class="nav-link"><i class="fas fa-arrow-left"></i> Back to Home</a>
+    
+    <div class="glass-card">
+        <img src="~/images/RGMCET.jpg" alt="RGMCET Logo" class="logo" />
+        <div class="admin-icon"><i class="fas fa-user-shield"></i></div>
+        <h2>Admin Login</h2>
+
+        <form asp-action="Login" method="post">
+            @if (!ViewData.ModelState.IsValid && ViewData.ModelState.ErrorCount > 0)
+            {
+                <div asp-validation-summary="All" class="validation-summary"></div>
+            }
+            
+            <div class="form-group">
+                <label><i class="fas fa-envelope"></i> Email Address:</label>
+                <input asp-for="Email" type="email" required />
+                <span asp-validation-for="Email" class="field-validation-error"></span>
+            </div>
+
+            <div class="form-group">
+                <label><i class="fas fa-lock"></i> Password:</label>
+                <div class="password-container">
+                    <input asp-for="Password" type="password" id="password" required />
+                    <button type="button" class="password-toggle" onclick="togglePassword()">
+                        <i class="fas fa-eye" id="eye"></i>
+                    </button>
+                </div>
+                <span asp-validation-for="Password" class="field-validation-error"></span>
+            </div>
+
+            <button type="submit" class="glass-btn">
+                <i class="fas fa-shield-alt"></i> Login as Admin
+            </button>
+        </form>
+    </div>
+
+    <script type="text/javascript">
+        function togglePassword() {
+            var pwd = document.getElementById("password");
+            var eye = document.getElementById("eye");
+            if (pwd.type === "password") {
+                pwd.type = "text";
+                eye.className = "fas fa-eye-slash";
+            } else {
+                pwd.type = "password";
+                eye.className = "fas fa-eye";
+            }
+        }
+    </script>
+</body>
+</html>

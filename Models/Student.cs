@@ -1,12 +1,15 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 
 namespace TutorLiveMentor.Models
 {
     public class Student
     {
-        public int Id { get; set; }
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.None)] // Remove auto-increment
+        public string Id { get; set; } // Changed from int to string
 
         [Required]
         public string FullName { get; set; }

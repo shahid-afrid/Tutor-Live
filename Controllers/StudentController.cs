@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -36,6 +37,16 @@ namespace TutorLiveMentor.Controllers
         {
             if (ModelState.IsValid)
             {
+                // Convert registration number to uppercase on server side as well
+                model.RegdNumber = model.RegdNumber?.ToUpper();
+                
+                // Check if student with this registration number already exists
+                if (await _context.Students.AnyAsync(s => s.Id == model.RegdNumber))
+                {
+                    ModelState.AddModelError("RegdNumber", "Registration number is already registered.");
+                    return View(model);
+                }
+                
                 if (await _context.Students.AnyAsync(s => s.Email == model.Email))
                 {
                     ModelState.AddModelError("Email", "Email is already registered.");
@@ -44,6 +55,7 @@ namespace TutorLiveMentor.Controllers
 
                 var student = new Student
                 {
+                    Id = model.RegdNumber, // Set Id equal to RegdNumber
                     FullName = model.FullName,
                     RegdNumber = model.RegdNumber,
                     Year = model.Year,
@@ -95,8 +107,8 @@ namespace TutorLiveMentor.Controllers
                 // Clear any existing session
                 HttpContext.Session.Clear();
 
-                // Set session values
-                HttpContext.Session.SetInt32("StudentId", student.Id);
+                // Set session values - now using string Id
+                HttpContext.Session.SetString("StudentId", student.Id);
                 HttpContext.Session.SetString("StudentName", student.FullName);
 
                 // Force session to be saved immediately
@@ -116,9 +128,9 @@ namespace TutorLiveMentor.Controllers
         public IActionResult MainDashboard()
         {
             // Simple session check
-            var studentId = HttpContext.Session.GetInt32("StudentId");
+            var studentId = HttpContext.Session.GetString("StudentId");
             
-            if (studentId == null)
+            if (string.IsNullOrEmpty(studentId))
             {
                 TempData["ErrorMessage"] = "Please login to access the dashboard.";
                 return RedirectToAction("Login");
@@ -134,8 +146,8 @@ namespace TutorLiveMentor.Controllers
         [HttpGet]
         public async Task<IActionResult> Dashboard()
         {
-            var studentId = HttpContext.Session.GetInt32("StudentId");
-            if (studentId == null)
+            var studentId = HttpContext.Session.GetString("StudentId");
+            if (string.IsNullOrEmpty(studentId))
             {
                 return RedirectToAction("Login");
             }
@@ -147,7 +159,7 @@ namespace TutorLiveMentor.Controllers
                 .Include(s => s.Enrollments)
                     .ThenInclude(e => e.AssignedSubject)
                     .ThenInclude(asub => asub.Faculty)
-                .FirstOrDefaultAsync(s => s.Id == studentId.Value);
+                .FirstOrDefaultAsync(s => s.Id == studentId);
 
             if (student == null)
             {
@@ -161,8 +173,8 @@ namespace TutorLiveMentor.Controllers
         [HttpPost]
         public async Task<IActionResult> SelectSubject(int assignedSubjectId)
         {
-            var studentId = HttpContext.Session.GetInt32("StudentId");
-            if (studentId == null)
+            var studentId = HttpContext.Session.GetString("StudentId");
+            if (string.IsNullOrEmpty(studentId))
             {
                 return RedirectToAction("Login");
             }
@@ -171,7 +183,7 @@ namespace TutorLiveMentor.Controllers
                 .Include(s => s.Enrollments)
                     .ThenInclude(e => e.AssignedSubject)
                     .ThenInclude(a => a.Subject)
-                .FirstOrDefaultAsync(s => s.Id == studentId.Value);
+                .FirstOrDefaultAsync(s => s.Id == studentId);
             
             var assignedSubject = await _context.AssignedSubjects
                 .Include(a => a.Subject)
@@ -241,8 +253,8 @@ namespace TutorLiveMentor.Controllers
         [HttpPost]
         public async Task<IActionResult> UnenrollSubject(int assignedSubjectId)
         {
-            var studentId = HttpContext.Session.GetInt32("StudentId");
-            if (studentId == null)
+            var studentId = HttpContext.Session.GetString("StudentId");
+            if (string.IsNullOrEmpty(studentId))
             {
                 return RedirectToAction("Login");
             }
@@ -254,7 +266,7 @@ namespace TutorLiveMentor.Controllers
                 .Include(s => s.Enrollments)
                     .ThenInclude(e => e.AssignedSubject)
                     .ThenInclude(a => a.Faculty)
-                .FirstOrDefaultAsync(s => s.Id == studentId.Value);
+                .FirstOrDefaultAsync(s => s.Id == studentId);
 
             if (student == null)
             {
@@ -265,7 +277,7 @@ namespace TutorLiveMentor.Controllers
             if (enrollment == null)
             {
                 TempData["ErrorMessage"] = "You are not enrolled in this subject.";
-                return RedirectToAction("AssignedFaculty");
+                return RedirectToAction("SelectSubject");
             }
 
             var assignedSubject = await _context.AssignedSubjects
@@ -302,18 +314,18 @@ namespace TutorLiveMentor.Controllers
             await _context.SaveChangesAsync();
 
             TempData["SuccessMessage"] = $"Successfully unenrolled from {assignedSubject?.Subject.Name}.";
-            return RedirectToAction("AssignedFaculty");
+            return RedirectToAction("SelectSubject");
         }
 
         [HttpGet]
         public async Task<IActionResult> Edit()
         {
-            var studentId = HttpContext.Session.GetInt32("StudentId");
-            if (studentId == null)
+            var studentId = HttpContext.Session.GetString("StudentId");
+            if (string.IsNullOrEmpty(studentId))
             {
                 return RedirectToAction("Login");
             }
-            var student = await _context.Students.FindAsync(studentId.Value);
+            var student = await _context.Students.FindAsync(studentId);
             if (student == null)
             {
                 return NotFound();
@@ -324,21 +336,21 @@ namespace TutorLiveMentor.Controllers
         [HttpPost]
         public async Task<IActionResult> Edit(Student model)
         {
-            var studentId = HttpContext.Session.GetInt32("StudentId");
-            if (studentId == null)
+            var studentId = HttpContext.Session.GetString("StudentId");
+            if (string.IsNullOrEmpty(studentId))
             {
                 return RedirectToAction("Login");
             }
 
             // Ensure the model ID matches the logged-in student's ID
-            if (model.Id != studentId.Value)
+            if (model.Id != studentId)
             {
                 return BadRequest();
             }
 
             if (ModelState.IsValid)
             {
-                var studentToUpdate = await _context.Students.FindAsync(studentId.Value);
+                var studentToUpdate = await _context.Students.FindAsync(studentId);
                 if (studentToUpdate == null)
                 {
                     return NotFound();
@@ -362,10 +374,10 @@ namespace TutorLiveMentor.Controllers
         [HttpGet]
         public async Task<IActionResult> Logout()
         {
-            var studentId = HttpContext.Session.GetInt32("StudentId");
-            if (studentId != null)
+            var studentId = HttpContext.Session.GetString("StudentId");
+            if (!string.IsNullOrEmpty(studentId))
             {
-                var student = await _context.Students.FindAsync(studentId.Value);
+                var student = await _context.Students.FindAsync(studentId);
                 if (student != null)
                 {
                     await _signalRService.NotifyUserActivity(student.FullName, "Student", "Logged Out", "Student logged out of the system");
@@ -379,8 +391,8 @@ namespace TutorLiveMentor.Controllers
         [HttpGet]
         public async Task<IActionResult> SelectSubject()
         {
-            var studentId = HttpContext.Session.GetInt32("StudentId");
-            if (studentId == null)
+            var studentId = HttpContext.Session.GetString("StudentId");
+            if (string.IsNullOrEmpty(studentId))
             {
                 return RedirectToAction("Login");
             }
@@ -392,7 +404,7 @@ namespace TutorLiveMentor.Controllers
                 .Include(s => s.Enrollments)
                     .ThenInclude(e => e.AssignedSubject)
                     .ThenInclude(asub => asub.Faculty)
-                .FirstOrDefaultAsync(s => s.Id == studentId.Value);
+                .FirstOrDefaultAsync(s => s.Id == studentId);
 
             if (student == null)
             {
@@ -427,6 +439,7 @@ namespace TutorLiveMentor.Controllers
             return View(viewModel);
         }
 
+        /*
         [HttpGet]
         public async Task<IActionResult> AssignedFaculty()
         {
@@ -452,17 +465,18 @@ namespace TutorLiveMentor.Controllers
 
             return View(student);
         }
+        */
 
         [HttpGet]
         public async Task<IActionResult> ChangePassword()
         {
-            var studentId = HttpContext.Session.GetInt32("StudentId");
-            if (studentId == null)
+            var studentId = HttpContext.Session.GetString("StudentId");
+            if (string.IsNullOrEmpty(studentId))
             {
                 return RedirectToAction("Login");
             }
 
-            var student = await _context.Students.FindAsync(studentId.Value);
+            var student = await _context.Students.FindAsync(studentId);
             if (student == null)
             {
                 return NotFound();
@@ -480,20 +494,20 @@ namespace TutorLiveMentor.Controllers
         [HttpPost]
         public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
         {
-            var studentId = HttpContext.Session.GetInt32("StudentId");
-            if (studentId == null)
+            var studentId = HttpContext.Session.GetString("StudentId");
+            if (string.IsNullOrEmpty(studentId))
             {
                 return RedirectToAction("Login");
             }
 
-            if (model.StudentId != studentId.Value)
+            if (model.StudentId != studentId)
             {
                 return BadRequest();
             }
 
             if (ModelState.IsValid)
             {
-                var student = await _context.Students.FindAsync(studentId.Value);
+                var student = await _context.Students.FindAsync(studentId);
                 if (student == null)
                 {
                     return NotFound();
@@ -535,8 +549,7 @@ namespace TutorLiveMentor.Controllers
             {
                 SessionId = HttpContext.Session.Id,
                 TestValue = testValue,
-                StudentId = HttpContext.Session.GetInt32("StudentId"),
-                StudentIdString = HttpContext.Session.GetString("StudentId"),
+                StudentId = HttpContext.Session.GetString("StudentId"), // Changed to string
                 SessionIsAvailable = HttpContext.Session.IsAvailable
             };
             
@@ -550,8 +563,7 @@ namespace TutorLiveMentor.Controllers
             var student = await _context.Students.FirstOrDefaultAsync();
             if (student != null)
             {
-                HttpContext.Session.SetInt32("StudentId", student.Id);
-                HttpContext.Session.SetString("StudentId", student.Id.ToString());
+                HttpContext.Session.SetString("StudentId", student.Id); // Changed to string
                 await HttpContext.Session.CommitAsync();
                 
                 return Json(new { 
@@ -588,7 +600,7 @@ namespace TutorLiveMentor.Controllers
                     SampleStudents = sampleStudents.Cast<object>().ToList(),
                     SessionWorking = sessionTest == "Working",
                     SessionId = HttpContext.Session.Id,
-                    CurrentStudentId = HttpContext.Session.GetInt32("StudentId"),
+                    CurrentStudentId = HttpContext.Session.GetString("StudentId"), // Changed to string
                     Timestamp = DateTime.Now
                 };
 
@@ -603,7 +615,7 @@ namespace TutorLiveMentor.Controllers
                     SampleStudents = new List<object>(),
                     SessionWorking = false,
                     SessionId = HttpContext.Session.Id,
-                    CurrentStudentId = HttpContext.Session.GetInt32("StudentId"),
+                    CurrentStudentId = HttpContext.Session.GetString("StudentId"), // Changed to string
                     Timestamp = DateTime.Now,
                     Error = ex.Message
                 };
@@ -684,13 +696,12 @@ namespace TutorLiveMentor.Controllers
                 // SUCCESS - Now try to log in
                 Console.WriteLine($"? Credentials match! Logging in student: {studentWithCredentials.FullName}");
 
-                // Set session
-                HttpContext.Session.SetInt32("StudentId", studentWithCredentials.Id);
-                HttpContext.Session.SetString("StudentId", studentWithCredentials.Id.ToString());
+                // Set session - now using string
+                HttpContext.Session.SetString("StudentId", studentWithCredentials.Id);
                 await HttpContext.Session.CommitAsync();
 
                 // Verify session was set
-                var sessionCheck = HttpContext.Session.GetInt32("StudentId");
+                var sessionCheck = HttpContext.Session.GetString("StudentId");
                 Console.WriteLine($"? Session set. StudentId in session: {sessionCheck}");
 
                 return Json(new { 
@@ -758,5 +769,4 @@ namespace TutorLiveMentor.Controllers
     {
         public Student Student { get; set; }
         public IEnumerable<IGrouping<string, AssignedSubject>> AvailableSubjectsGrouped { get; set; }
-    }
-}
+    }}

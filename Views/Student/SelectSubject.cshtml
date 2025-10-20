@@ -484,7 +484,7 @@
 
     <div class="main-container">
         <div class="dashboard-header">
-            <h2>?? Select Your Subjects</h2>
+            <h2><i class="fas fa-book-open"></i> Select Your Subjects</h2>
             <div class="user-info">
                 Welcome, <strong>@Model.Student.FullName</strong> | 
                 Year: <strong>@Model.Student.Year</strong> | 
@@ -583,7 +583,7 @@
     </div>
 
     <script>
-        // ?? SIGNALR REAL-TIME CONNECTION
+        // SIGNALR REAL-TIME CONNECTION
         const connection = new signalR.HubConnectionBuilder()
             .withUrl("/selectionHub")
             .withAutomaticReconnect()
@@ -593,7 +593,7 @@
         const statusElement = document.getElementById('connectionStatus');
         
         connection.start().then(function () {
-            console.log('?? SignalR Connected!');
+            console.log('SignalR Connected!');
             statusElement.innerHTML = '<span class="status-dot connected"></span> Live Updates Active';
             statusElement.className = 'connection-status connected';
             
@@ -609,7 +609,7 @@
             }
             
         }).catch(function (err) {
-            console.error('? SignalR Connection Error:', err);
+            console.error('SignalR Connection Error:', err);
             statusElement.innerHTML = '<span class="status-dot disconnected"></span> Offline Mode';
             statusElement.className = 'connection-status disconnected';
         });
@@ -625,11 +625,11 @@
             showNotification('Connection restored! Live updates are back online.', 'success');
         });
 
-        // ?? REAL-TIME EVENT HANDLERS
+        // REAL-TIME EVENT HANDLERS
 
         // Subject selection updates
         connection.on("SubjectSelectionUpdated", function (data) {
-            console.log('?? Subject Selection Update:', data);
+            console.log('Subject Selection Update:', data);
             
             updateFacultyCard(data.AssignedSubjectId, data.NewCount, data.IsFull);
             
@@ -642,7 +642,7 @@
 
         // Subject unenrollment updates
         connection.on("SubjectUnenrollmentUpdated", function (data) {
-            console.log('?? Subject Unenrollment Update:', data);
+            console.log('Subject Unenrollment Update:', data);
             
             updateFacultyCard(data.AssignedSubjectId, data.NewCount, false);
             
@@ -655,7 +655,7 @@
 
         // Subject availability changes
         connection.on("SubjectAvailabilityChanged", function (data) {
-            console.log('?? Availability Changed:', data);
+            console.log('Availability Changed:', data);
             
             showNotification(
                 `${data.SubjectName} - ${data.Message}`,
@@ -666,7 +666,7 @@
         // User activity notifications
         connection.on("UserActivity", function (data) {
             if (data.Action === 'Enrolled' || data.Action === 'Unenrolled') {
-                console.log('?? User Activity:', data);
+                console.log('User Activity:', data);
             }
         });
 
@@ -675,7 +675,7 @@
             showNotification(data.Message, data.Type);
         });
 
-        // ?? HELPER FUNCTIONS
+        // HELPER FUNCTIONS
 
         function updateFacultyCard(assignedSubjectId, newCount, isFull) {
             const card = document.querySelector(`[data-assigned-subject-id="${assignedSubjectId}"]`);
@@ -779,7 +779,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             setTimeout(() => {
                 if (connection.state === signalR.HubConnectionState.Connected) {
-                    showNotification('?? Real-time updates are now active! You\'ll see live enrollment counts.', 'success');
+                    showNotification('Real-time updates are now active! You\'ll see live enrollment counts.', 'success');
                 }
             }, 2000);
         });

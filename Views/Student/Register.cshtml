@@ -141,6 +141,27 @@
             border: none;
             cursor: pointer;
             font-size: 18px;
+            z-index: 3;
+        }
+
+        .validation-icon {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.2em;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 2;
+        }
+
+        .validation-icon.show {
+            opacity: 1;
+        }
+
+        /* Special positioning for password field validation icon */
+        #passwordIcon {
+            right: 45px !important;
             z-index: 2;
         }
 
@@ -303,7 +324,7 @@
 
             <div class="form-group">
                 <label class="required">Registration Number</label>
-                @Html.TextBoxFor(m => m.RegdNumber, new { id = "regdnum", maxlength = "10", @required = "required", oninput = "validateRegdNum(this)" })
+                @Html.TextBoxFor(m => m.RegdNumber, new { id = "regdnum", maxlength = "10", @required = "required", oninput = "validateRegdNum(this)", style = "text-transform: uppercase;" })
                 <span class="validation-icon" id="regdIcon"></span>
                 <span id="regdError" class="real-time-error"></span>
                 @Html.ValidationMessageFor(m => m.RegdNumber)
@@ -340,11 +361,11 @@
                 <label class="required">Password (8+ chars, 1 uppercase, 1 digit, 1 special character)</label>
                 <div class="password-container">
                     <input type="password" id="password" name="Password" required oninput="validatePassword(this)" />
+                    <span class="validation-icon" id="passwordIcon" style="right: 45px;"></span>
                     <button type="button" class="password-toggle" onclick="togglePassword()">
                         <span id="eye">👁️</span>
                     </button>
                 </div>
-                <span class="validation-icon" id="passwordIcon"></span>
                 <span id="passwordError" class="real-time-error"></span>
                 @Html.ValidationMessageFor(m => m.Password)
             </div>
@@ -398,8 +419,9 @@
         }
 
         function validateFullName(input) {
-            const isValid = input.value.trim().length >= 2 && /^[a-zA-Z\s]+$/.test(input.value);
-            const message = isValid ? 'Valid name ✓' : 'Name must be at least 2 characters and contain only letters';
+            // Allow letters, spaces, and dots
+            const isValid = input.value.trim().length >= 2 && /^[a-zA-Z\s.]+$/.test(input.value);
+            const message = isValid ? 'Valid name ✓' : 'Name must be at least 2 characters and contain only letters, spaces, and dots';
             
             validationState.fullName = isValid;
             showValidation('FullName', isValid, message);
@@ -407,8 +429,11 @@
         }
 
         function validateRegdNum(input) {
-            const isValid = input.value.length === 10 && /^[A-Za-z0-9]+$/.test(input.value);
-            const message = isValid ? 'Valid registration number ✓' : 'Registration number must be exactly 10 alphanumeric characters';
+            // Convert to uppercase automatically
+            input.value = input.value.toUpperCase();
+            
+            const isValid = input.value.length === 10 && /^[A-Z0-9]+$/.test(input.value);
+            const message = isValid ? 'Valid registration number ✓' : 'Registration number must be exactly 10 alphanumeric characters (uppercase)';
             
             validationState.regdNumber = isValid;
             showValidation('regdnum', isValid, message);

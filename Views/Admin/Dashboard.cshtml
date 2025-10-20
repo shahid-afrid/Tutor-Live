@@ -1,0 +1,269 @@
+@model TutorLiveMentor.Models.AdminDashboardViewModel
+
+@{
+    ViewBag.Title = "System Overview";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>System Overview - Admin Dashboard</title>
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:700,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <style>
+        :root {
+            --royal-blue: #274060;
+            --warm-gold: #FFC857;
+            --cream: #F9FAF2;
+            --slate: #CED3DC;
+            --card-shadow: rgba(39,64,96,0.13);
+            --admin-orange: #fd7e14;
+            --success-green: #28a745;
+            --info-blue: #17a2b8;
+            --warning-yellow: #ffc107;
+            --purple: #6f42c1;
+        }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            font-family: 'Montserrat', Arial, sans-serif;
+            background: linear-gradient(rgba(249, 250, 242, 0.15), rgba(255, 200, 87, 0.10)),
+            url('@Url.Content("~/images/RGMCET-BACKGROUND.jpg")') center center/cover no-repeat fixed;
+            position: relative;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 0;
+            display: block;
+            background: linear-gradient(135deg, var(--cream) 60%, var(--warm-gold) 100%);
+            opacity: 0.20;
+            pointer-events: none;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header {
+            background: rgba(249,250,242,0.92);
+            box-shadow: 0 8px 24px var(--card-shadow);
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            backdrop-filter: blur(12px);
+            border: 2px solid var(--slate);
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            font-weight: 700;
+            color: var(--royal-blue);
+            margin: 0;
+            letter-spacing: 1px;
+        }
+
+        .header p {
+            color: var(--admin-orange);
+            font-size: 1.2em;
+            margin: 10px 0 0 0;
+            font-weight: 600;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: rgba(249,250,242,0.92);
+            box-shadow: 0 12px 30px var(--card-shadow);
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            backdrop-filter: blur(12px);
+            border: 2px solid var(--slate);
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 16px 40px var(--card-shadow);
+        }
+
+        .stat-card.students { border-left: 6px solid var(--info-blue); }
+        .stat-card.faculties { border-left: 6px solid var(--success-green); }
+        .stat-card.subjects { border-left: 6px solid var(--warning-yellow); }
+        .stat-card.enrollments { border-left: 6px solid var(--admin-orange); }
+        .stat-card.admins { border-left: 6px solid var(--purple); }
+
+        .stat-icon {
+            font-size: 3.5em;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .stat-card.students .stat-icon { color: var(--info-blue); }
+        .stat-card.faculties .stat-icon { color: var(--success-green); }
+        .stat-card.subjects .stat-icon { color: var(--warning-yellow); }
+        .stat-card.enrollments .stat-icon { color: var(--admin-orange); }
+        .stat-card.admins .stat-icon { color: var(--purple); }
+
+        .stat-number {
+            font-size: 3em;
+            font-weight: 700;
+            color: var(--royal-blue);
+            margin: 10px 0;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 1.2em;
+            color: var(--royal-blue);
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .stat-description {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .nav-buttons {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .nav-btn {
+            background: linear-gradient(90deg, var(--royal-blue), var(--admin-orange));
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 0 10px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1em;
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(39, 64, 96, 0.4);
+            text-decoration: none;
+            color: white;
+        }
+
+        .nav-btn.secondary {
+            background: linear-gradient(90deg, var(--slate), var(--royal-blue));
+        }
+
+        @@media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+
+            .header h1 {
+                font-size: 2em;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .stat-card {
+                padding: 25px 20px;
+            }
+
+            .nav-buttons {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                align-items: center;
+            }
+
+            .nav-btn {
+                margin: 0;
+                width: 200px;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-chart-line"></i> System Overview</h1>
+            <p>Real-time statistics and system health monitoring</p>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card students">
+                <i class="fas fa-user-graduate stat-icon"></i>
+                <span class="stat-number">@Model.TotalStudents</span>
+                <div class="stat-label">Total Students</div>
+                <div class="stat-description">Registered student accounts</div>
+            </div>
+
+            <div class="stat-card faculties">
+                <i class="fas fa-chalkboard-teacher stat-icon"></i>
+                <span class="stat-number">@Model.TotalFaculties</span>
+                <div class="stat-label">Total Faculty</div>
+                <div class="stat-description">Active faculty members</div>
+            </div>
+
+            <div class="stat-card subjects">
+                <i class="fas fa-book stat-icon"></i>
+                <span class="stat-number">@Model.TotalSubjects</span>
+                <div class="stat-label">Total Subjects</div>
+                <div class="stat-description">Available course subjects</div>
+            </div>
+
+            <div class="stat-card enrollments">
+                <i class="fas fa-clipboard-list stat-icon"></i>
+                <span class="stat-number">@Model.TotalEnrollments</span>
+                <div class="stat-label">Total Enrollments</div>
+                <div class="stat-description">Student-faculty connections</div>
+            </div>
+
+            <div class="stat-card admins">
+                <i class="fas fa-user-shield stat-icon"></i>
+                <span class="stat-number">@Model.TotalAdmins</span>
+                <div class="stat-label">System Admins</div>
+                <div class="stat-description">Active administrator accounts</div>
+            </div>
+        </div>
+
+        <div class="nav-buttons">
+            <a href="@Url.Action("MainDashboard", "Admin")" class="nav-btn secondary">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </a>
+            <a href="@Url.Action("Logout", "Admin")" class="nav-btn">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        </div>
+    </div>
+</body>
+</html>

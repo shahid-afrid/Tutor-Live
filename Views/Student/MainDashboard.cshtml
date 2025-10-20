@@ -206,11 +206,6 @@
         .dashboard-card:nth-child(2) .card-icon {
             color: var(--warm-gold);
         }
-
-        .dashboard-card:nth-child(3) .card-icon {
-            color: var(--success-green);
-        }
-
         @@media (max-width: 768px) {
             .main-container {
                 padding: 0 15px;
@@ -267,13 +262,6 @@
                 <h5 class="card-title">Select Subject</h5>
                 <p class="card-text">Choose subjects and faculty for the semester.</p>
                 <a asp-controller="Student" asp-action="SelectSubject" class="glass-btn">Select Now</a>
-            </div>
-
-            <div class="dashboard-card">
-                <div class="card-icon">👩‍🏫</div>
-                <h5 class="card-title">Assigned Faculty</h5>
-                <p class="card-text">View your enrolled subjects and assigned faculty.</p>
-                <a asp-controller="Student" asp-action="AssignedFaculty" class="glass-btn">View Details</a>
             </div>
         </div>
     </div>

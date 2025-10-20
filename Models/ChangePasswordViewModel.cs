@@ -4,7 +4,7 @@ namespace TutorLiveMentor.Models
 {
     public class ChangePasswordViewModel
     {
-        public int StudentId { get; set; }
+        public string StudentId { get; set; } // Changed from int to string
         public string StudentName { get; set; }
 
         [Required(ErrorMessage = "Current password is required")]

@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System;
 
 namespace TutorLiveMentor.Models
 {
@@ -13,6 +14,7 @@ namespace TutorLiveMentor.Models
         public DbSet<Subject> Subjects { get; set; }
         public DbSet<AssignedSubject> AssignedSubjects { get; set; }
         public DbSet<StudentEnrollment> StudentEnrollments { get; set; }
+        public DbSet<Admin> Admins { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -45,6 +47,22 @@ namespace TutorLiveMentor.Models
                 .HasOne(se => se.AssignedSubject)
                 .WithMany(a => a.Enrollments)
                 .HasForeignKey(se => se.AssignedSubjectId);
+
+            // Admin configuration
+            modelBuilder.Entity<Admin>()
+                .HasIndex(a => a.Email)
+                .IsUnique();
+
+            // Seed the specific admin data you requested
+            modelBuilder.Entity<Admin>().HasData(
+                new Admin
+                {
+                    AdminId = 1,
+                    Email = "cseds@rgmcet.edu.in",
+                    Password = "admin123",
+                    Department = "CSEDS"
+                }
+            );
         }
     }
 }
