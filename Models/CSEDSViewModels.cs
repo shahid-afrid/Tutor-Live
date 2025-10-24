@@ -112,9 +112,7 @@ namespace TutorLiveMentor.Models
         public List<SemesterOption> AvailableSemesters { get; set; } = new List<SemesterOption>
         {
             new SemesterOption { Value = "I", Text = "I (1)", NumericValue = 1 },
-            new SemesterOption { Value = "II", Text = "II (2)", NumericValue = 2 },
-            new SemesterOption { Value = "III", Text = "III (3)", NumericValue = 3 },
-            new SemesterOption { Value = "IV", Text = "IV (4)", NumericValue = 4 }
+            new SemesterOption { Value = "II", Text = "II (2)", NumericValue = 2 }
         };
         
         // For editing purposes
@@ -192,9 +190,7 @@ namespace TutorLiveMentor.Models
         public List<SemesterOption> AvailableSemesters { get; set; } = new List<SemesterOption>
         {
             new SemesterOption { Value = "I", Text = "I (1)", NumericValue = 1 },
-            new SemesterOption { Value = "II", Text = "II (2)", NumericValue = 2 },
-            new SemesterOption { Value = "III", Text = "III (3)", NumericValue = 3 },
-            new SemesterOption { Value = "IV", Text = "IV (4)", NumericValue = 4 }
+            new SemesterOption { Value = "II", Text = "II (2)", NumericValue = 2 }
         };
 
         // Report results
@@ -426,5 +422,135 @@ namespace TutorLiveMentor.Models
         public string Format { get; set; } = "Excel"; // Excel, PDF, CSV
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
+    }
+
+    /// <summary>
+    /// View model for comprehensive student management
+    /// </summary>
+    public class StudentManagementViewModel
+    {
+        public List<StudentDetailDto> DepartmentStudents { get; set; } = new List<StudentDetailDto>();
+        public List<Subject> AvailableSubjects { get; set; } = new List<Subject>();
+        public string Department { get; set; } = "CSEDS";
+        public string AdminEmail { get; set; } = string.Empty;
+        public List<int> AvailableYears { get; set; } = new List<int> { 1, 2, 3, 4 };
+        public List<SemesterOption> AvailableSemesters { get; set; } = new List<SemesterOption>
+        {
+            new SemesterOption { Value = "I", Text = "I (1)", NumericValue = 1 },
+            new SemesterOption { Value = "II", Text = "II (2)", NumericValue = 2 }
+        };
+    }
+
+    /// <summary>
+    /// Detailed student information with enrollments
+    /// </summary>
+    public class StudentDetailDto
+    {
+        public string StudentId { get; set; } = string.Empty;
+        public string FullName { get; set; } = string.Empty;
+        public string RegdNumber { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string Year { get; set; } = string.Empty;
+        public string Department { get; set; } = string.Empty;
+        public List<EnrolledSubjectInfo> EnrolledSubjects { get; set; } = new List<EnrolledSubjectInfo>();
+        public int TotalEnrollments { get; set; }
+        public DateTime? LastLoginDate { get; set; }
+        public DateTime? CreatedDate { get; set; }
+        public bool IsActive { get; set; } = true;
+    }
+
+    /// <summary>
+    /// Enrolled subject information for student
+    /// </summary>
+    public class EnrolledSubjectInfo
+    {
+        public int EnrollmentId { get; set; }
+        public int SubjectId { get; set; }
+        public string SubjectName { get; set; } = string.Empty;
+        public string FacultyName { get; set; } = string.Empty;
+        public string Semester { get; set; } = string.Empty;
+        public int Year { get; set; }
+        public DateTime? EnrollmentDate { get; set; }
+        public bool IsActive { get; set; }
+    }
+
+    /// <summary>
+    /// View model for adding/editing CSEDS students
+    /// </summary>
+    public class CSEDSStudentViewModel
+    {
+        public string StudentId { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Student name is required")]
+        [StringLength(100, ErrorMessage = "Name cannot exceed 100 characters")]
+        public string FullName { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Registration number is required")]
+        [StringLength(20, ErrorMessage = "Registration number cannot exceed 20 characters")]
+        public string RegdNumber { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Email is required")]
+        [EmailAddress(ErrorMessage = "Invalid email format")]
+        [StringLength(100, ErrorMessage = "Email cannot exceed 100 characters")]
+        public string Email { get; set; } = string.Empty;
+
+        [StringLength(255)]
+        public string Password { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Year is required")]
+        public string Year { get; set; } = string.Empty;
+
+        // Department is automatically set to CSEDS
+        public string Department { get; set; } = "CSEDS";
+
+        // Available options for dropdowns
+        public List<string> AvailableYears { get; set; } = new List<string> { "I Year", "II Year", "III Year", "IV Year" };
+        
+        // For editing purposes
+        public bool IsEdit { get; set; } = false;
+        public bool IsActive { get; set; } = true;
+    }
+
+    /// <summary>
+    /// Enhanced search and filter options for students
+    /// </summary>
+    public class StudentSearchFilter
+    {
+        public string? SearchText { get; set; }
+        public string? Department { get; set; }
+        public string? Year { get; set; }
+        public string? Semester { get; set; }
+        public bool? IsActive { get; set; }
+        public bool? HasEnrollments { get; set; }
+        public int? MinEnrollments { get; set; }
+        public int? MaxEnrollments { get; set; }
+        public DateTime? CreatedAfter { get; set; }
+        public DateTime? CreatedBefore { get; set; }
+        public string SortBy { get; set; } = "FullName"; // FullName, RegdNumber, Email, Year, TotalEnrollments, CreatedDate
+        public string SortOrder { get; set; } = "ASC"; // ASC, DESC
+        public int PageNumber { get; set; } = 1;
+        public int PageSize { get; set; } = 10;
+    }
+
+    /// <summary>
+    /// Request/Response models for student operations
+    /// </summary>
+    public class BulkStudentOperationRequest
+    {
+        public List<string> StudentIds { get; set; } = new List<string>();
+        public string Operation { get; set; } = string.Empty; // "delete", "activate", "deactivate"
+    }
+
+    /// <summary>
+    /// Student import model for bulk operations
+    /// </summary>
+    public class StudentImportModel
+    {
+        public string FullName { get; set; } = string.Empty;
+        public string RegdNumber { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
+        public string Year { get; set; } = string.Empty;
+        public string Department { get; set; } = string.Empty;
     }
 }

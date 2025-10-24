@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TutorLiveMentor.Models;
 
@@ -11,9 +12,11 @@ using TutorLiveMentor.Models;
 namespace TutorLiveMentor10.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251020131917_AddCreatedDateAndLastLoginToAdmin")]
+    partial class AddCreatedDateAndLastLoginToAdmin
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -62,7 +65,7 @@ namespace TutorLiveMentor10.Migrations
                         new
                         {
                             AdminId = 1,
-                            CreatedDate = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedDate = new DateTime(2025, 10, 20, 18, 49, 16, 342, DateTimeKind.Local).AddTicks(3298),
                             Department = "CSEDS",
                             Email = "cseds@rgmcet.edu.in",
                             Password = "admin123"

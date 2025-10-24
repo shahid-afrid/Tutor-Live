@@ -1,0 +1,739 @@
+@model TutorLiveMentor.Models.StudentManagementViewModel
+@{
+    ViewData["Title"] = "Manage CSEDS Students";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Manage CSEDS Students - TutorLiveMentor</title>
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:700,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <style>
+        :root {
+            --royal-blue: #274060;
+            --warm-gold: #FFC857;
+            --cream: #F9FAF2;
+            --slate: #CED3DC;
+            --card-shadow: rgba(39,64,96,0.13);
+            --success-green: #28a745;
+            --error-red: #dc3545;
+            --cseds-purple: #9b59b6;
+            --cseds-teal: #20c997;
+        }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px 0;
+            font-family: 'Montserrat', Arial, sans-serif;
+            background: linear-gradient(rgba(249, 250, 242, 0.15), rgba(255, 200, 87, 0.10)),
+            url('@Url.Content("~/images/RGMCET-BACKGROUND.jpg")') center center/cover no-repeat fixed;
+            position: relative;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 0;
+            display: block;
+            background: linear-gradient(135deg, var(--cream) 60%, var(--warm-gold) 100%);
+            opacity: 0.20;
+            pointer-events: none;
+        }
+
+        .main-container {
+            position: relative;
+            z-index: 1;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .page-header {
+            background: rgba(249,250,242,0.92);
+            box-shadow: 0 8px 32px var(--card-shadow);
+            border-radius: 20px;
+            padding: 30px 40px;
+            text-align: center;
+            backdrop-filter: blur(12px);
+            margin-bottom: 30px;
+            border: 2px solid var(--slate);
+        }
+
+        .page-header h1 {
+            font-size: 2.5em;
+            font-weight: 700;
+            color: var(--royal-blue);
+            margin: 0 0 10px 0;
+            letter-spacing: 1.2px;
+        }
+
+        .filters-card {
+            background: rgba(249,250,242,0.95);
+            border-radius: 20px;
+            padding: 30px;
+            backdrop-filter: blur(12px);
+            border: 2px solid var(--slate);
+            box-shadow: 0 8px 32px var(--card-shadow);
+            margin-bottom: 30px;
+        }
+
+        .filters-header {
+            background: linear-gradient(135deg, var(--cseds-purple), var(--cseds-teal));
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .form-group {
+            margin-bottom: 0;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.9em;
+            color: var(--royal-blue);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid var(--slate);
+            border-radius: 8px;
+            font-size: 1em;
+            background: rgba(255, 255, 255, 0.8);
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--cseds-purple);
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 0 0 3px rgba(155, 89, 182, 0.1);
+        }
+
+        .glass-btn {
+            background: linear-gradient(135deg, var(--cseds-purple) 0%, var(--cseds-teal) 100%);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            padding: 12px 25px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 6px 20px var(--card-shadow);
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .glass-btn:hover {
+            background: linear-gradient(135deg, var(--cseds-teal) 0%, var(--cseds-purple) 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(155, 89, 182, 0.4);
+            text-decoration: none;
+            color: white;
+        }
+
+        .glass-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            justify-content: flex-start;
+            flex-wrap: wrap;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #28a745, #20c997);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #dc3545, #e74c3c);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+        }
+
+        .btn-back {
+            background: linear-gradient(135deg, var(--slate) 0%, #95a5a6 100%);
+        }
+
+        .btn-back:hover {
+            background: linear-gradient(135deg, #95a5a6 0%, var(--slate) 100%);
+        }
+
+        .results-card {
+            background: rgba(249,250,242,0.95);
+            border-radius: 20px;
+            padding: 30px;
+            backdrop-filter: blur(12px);
+            border: 2px solid var(--slate);
+            box-shadow: 0 8px 32px var(--card-shadow);
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--slate);
+        }
+
+        .table-container {
+            max-height: 600px;
+            overflow-y: auto;
+            border: 2px solid var(--slate);
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 0;
+        }
+
+        .table th {
+            background: linear-gradient(135deg, var(--cseds-purple), var(--cseds-teal));
+            color: white;
+            padding: 15px 12px;
+            text-align: left;
+            font-weight: 600;
+            border: none;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .table td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            vertical-align: middle;
+        }
+
+        .table tr:hover {
+            background: rgba(155, 89, 182, 0.05);
+        }
+
+        .table tr:nth-child(even) {
+            background: rgba(249, 250, 242, 0.3);
+        }
+
+        .record-count {
+            color: #666;
+            font-weight: 600;
+            padding: 10px;
+            background: rgba(155, 89, 182, 0.1);
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 5px;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 0.875em;
+            border-radius: 15px;
+        }
+
+        .student-detail {
+            margin-bottom: 5px;
+        }
+
+        .enrollment-badge {
+            display: inline-block;
+            background: var(--cseds-teal);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            margin: 2px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+
+        .empty-state i {
+            font-size: 4em;
+            color: var(--cseds-purple);
+            margin-bottom: 20px;
+        }
+
+        /* Responsive Design */
+        @@media (max-width: 768px) {
+            .main-container {
+                padding: 0 15px;
+            }
+
+            .filter-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .btn-group {
+                justify-content: center;
+            }
+
+            .table th, .table td {
+                padding: 8px 6px;
+                font-size: 0.9em;
+            }
+
+            .results-header {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <!-- Header Section -->
+        <div class="page-header">
+            <h1><i class="fas fa-user-graduate"></i> Manage CSEDS Students</h1>
+            <p>Add, edit, and manage student profiles with enrollment tracking</p>
+        </div>
+
+        <!-- Filters Section -->
+        <div class="filters-card">
+            <div class="filters-header">
+                <h4 style="margin: 0;"><i class="fas fa-filter"></i> Student Filters & Actions</h4>
+            </div>
+            
+            <div class="filter-grid">
+                <div class="form-group">
+                    <label class="form-label">Search Students</label>
+                    <input type="text" id="searchText" class="form-control" placeholder="Name, Email, or Reg No">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Year</label>
+                    <select id="filterYear" class="form-control">
+                        <option value="">All Years</option>
+                        @foreach (var year in Model.AvailableYears)
+                        {
+                            <option value="@year Year">@year Year</option>
+                        }
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Semester</label>
+                    <select id="filterSemester" class="form-control">
+                        <option value="">All Semesters</option>
+                        @foreach (var semester in Model.AvailableSemesters)
+                        {
+                            <option value="@semester.Value">@semester.Text</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Enrollment Status</label>
+                    <select id="filterEnrollment" class="form-control">
+                        <option value="">All Students</option>
+                        <option value="true">With Enrollments</option>
+                        <option value="false">Without Enrollments</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="btn-group">
+                <button type="button" class="glass-btn" onclick="applyFilters()">
+                    <i class="fas fa-search"></i> Apply Filters
+                </button>
+                <button type="button" class="glass-btn" onclick="clearFilters()">
+                    <i class="fas fa-eraser"></i> Clear Filters
+                </button>
+                <a href="@Url.Action("AddCSEDSStudent")" class="glass-btn btn-success">
+                    <i class="fas fa-user-plus"></i> Add Student
+                </a>
+                <button type="button" class="glass-btn btn-success" onclick="exportExcel()" id="exportExcelBtn">
+                    <i class="fas fa-file-excel"></i> Export Excel
+                </button>
+                <button type="button" class="glass-btn btn-danger" onclick="exportPDF()" id="exportPdfBtn">
+                    <i class="fas fa-file-pdf"></i> Export PDF
+                </button>
+                <a href="@Url.Action("CSEDSDashboard")" class="glass-btn btn-back">
+                    <i class="fas fa-arrow-left"></i> Back to Dashboard
+                </a>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div class="results-card">
+            <div class="results-header">
+                <h4 style="margin: 0; color: var(--royal-blue);">
+                    <i class="fas fa-users"></i> CSEDS Students
+                </h4>
+                <div id="studentCount" class="record-count">Total Students: @Model.DepartmentStudents.Count</div>
+            </div>
+            
+            <div class="table-container">
+                <table class="table" id="studentsTable">
+                    <thead>
+                        <tr>
+                            <th>Student Details</th>
+                            <th>Registration No</th>
+                            <th>Email</th>
+                            <th>Year</th>
+                            <th>Enrollments</th>
+                            <th>Enrolled Subjects</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="studentsTableBody">
+                        @foreach (var student in Model.DepartmentStudents)
+                        {
+                            <tr data-student-id="@student.StudentId">
+                                <td>
+                                    <div class="student-detail">
+                                        <strong>@student.FullName</strong>
+                                    </div>
+                                    <div style="font-size: 0.9em; color: #666;">
+                                        ID: @student.StudentId
+                                    </div>
+                                </td>
+                                <td><strong>@student.RegdNumber</strong></td>
+                                <td>@student.Email</td>
+                                <td>@student.Year</td>
+                                <td>
+                                    <span class="enrollment-badge">
+                                        @student.TotalEnrollments Subjects
+                                    </span>
+                                </td>
+                                <td>
+                                    @foreach (var subject in student.EnrolledSubjects.Take(3))
+                                    {
+                                        <div class="enrollment-badge" title="Faculty: @subject.FacultyName">
+                                            @subject.SubjectName (Sem @subject.Semester)
+                                        </div>
+                                    }
+                                    @if (student.EnrolledSubjects.Count > 3)
+                                    {
+                                        <div class="enrollment-badge" style="background: #666;">
+                                            +@(student.EnrolledSubjects.Count - 3) more
+                                        </div>
+                                    }
+                                </td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <a href="@Url.Action("EditCSEDSStudent", new { id = student.StudentId })" 
+                                           class="glass-btn btn-sm btn-warning">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <button type="button" class="glass-btn btn-sm btn-danger" 
+                                                onclick="deleteStudent('@student.StudentId', '@student.FullName')">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            @if (Model.DepartmentStudents.Count == 0)
+            {
+                <div class="empty-state">
+                    <i class="fas fa-user-graduate"></i>
+                    <h3>No Students Found</h3>
+                    <p>No students are currently registered in the CSEDS department.</p>
+                    <a href="@Url.Action("AddCSEDSStudent")" class="glass-btn btn-success">
+                        <i class="fas fa-user-plus"></i> Add First Student
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+
+    <script>
+        let currentStudents = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.DepartmentStudents));
+
+        async function applyFilters() {
+            const filters = {
+                SearchText: document.getElementById('searchText').value || null,
+                Year: document.getElementById('filterYear').value || null,
+                Semester: document.getElementById('filterSemester').value || null,
+                HasEnrollments: document.getElementById('filterEnrollment').value === '' ? null : 
+                               (document.getElementById('filterEnrollment').value === 'true')
+            };
+
+            try {
+                const response = await fetch('@Url.Action("GetFilteredStudents")', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(filters)
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    currentStudents = result.data;
+                    displayStudents(result.data);
+                    document.getElementById('studentCount').textContent = `Total Students: ${result.data.length}`;
+                } else {
+                    alert('Error filtering students: ' + result.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error filtering students. Please try again.');
+            }
+        }
+
+        function clearFilters() {
+            document.getElementById('searchText').value = '';
+            document.getElementById('filterYear').value = '';
+            document.getElementById('filterSemester').value = '';
+            document.getElementById('filterEnrollment').value = '';
+            
+            // Reset to original data
+            displayStudents(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.DepartmentStudents)));
+            document.getElementById('studentCount').textContent = 'Total Students: @Model.DepartmentStudents.Count';
+        }
+
+        function displayStudents(students) {
+            const tbody = document.getElementById('studentsTableBody');
+            tbody.innerHTML = '';
+
+            if (students.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="text-center">
+                            <div class="empty-state">
+                                <i class="fas fa-search"></i>
+                                <h4>No Students Found</h4>
+                                <p>Try adjusting your filter criteria.</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            students.forEach(student => {
+                const subjectBadges = student.enrolledSubjects.slice(0, 3).map(subject => 
+                    `<div class="enrollment-badge" title="Faculty: ${subject.facultyName}">
+                        ${subject.subjectName} (Sem ${subject.semester})
+                     </div>`
+                ).join('');
+
+                const moreBadge = student.enrolledSubjects.length > 3 ? 
+                    `<div class="enrollment-badge" style="background: #666;">
+                        +${student.enrolledSubjects.length - 3} more
+                     </div>` : '';
+
+                const row = document.createElement('tr');
+                row.setAttribute('data-student-id', student.studentId);
+                row.innerHTML = `
+                    <td>
+                        <div class="student-detail">
+                            <strong>${student.fullName}</strong>
+                        </div>
+                        <div style="font-size: 0.9em; color: #666;">
+                            ID: ${student.studentId}
+                        </div>
+                    </td>
+                    <td><strong>${student.regdNumber}</strong></td>
+                    <td>${student.email}</td>
+                    <td>${student.year}</td>
+                    <td>
+                        <span class="enrollment-badge">
+                            ${student.totalEnrollments} Subjects
+                        </span>
+                    </td>
+                    <td>
+                        ${subjectBadges}
+                        ${moreBadge}
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            <a href="@Url.Action("EditCSEDSStudent")?id=${student.studentId}" 
+                               class="glass-btn btn-sm btn-warning">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <button type="button" class="glass-btn btn-sm btn-danger" 
+                                    onclick="deleteStudent('${student.studentId}', '${student.fullName}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        async function deleteStudent(studentId, studentName) {
+            if (!confirm(`Are you sure you want to delete ${studentName}? This will also remove all their enrollments.`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch('@Url.Action("DeleteCSEDSStudent")', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `id=${encodeURIComponent(studentId)}`
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Remove row from table
+                    const row = document.querySelector(`tr[data-student-id="${studentId}"]`);
+                    if (row) {
+                        row.remove();
+                    }
+                    
+                    // Update count
+                    const currentCount = parseInt(document.getElementById('studentCount').textContent.match(/\d+/)[0]);
+                    document.getElementById('studentCount').textContent = `Total Students: ${currentCount - 1}`;
+                    
+                    alert('Student deleted successfully!');
+                } else {
+                    alert('Error deleting student: ' + result.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error deleting student. Please try again.');
+            }
+        }
+
+        async function exportExcel() {
+            if (currentStudents.length === 0) {
+                alert('No data to export. Please add some students first.');
+                return;
+            }
+
+            try {
+                const exportBtn = document.getElementById('exportExcelBtn');
+                const originalText = exportBtn.innerHTML;
+                exportBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Exporting...';
+                exportBtn.disabled = true;
+
+                const response = await fetch('@Url.Action("ExportStudentsExcel", "AdminReports")', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(currentStudents)
+                });
+
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `CSEDS_Students_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.xlsx`;
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                } else {
+                    alert('Failed to export Excel file. Please try again.');
+                }
+
+                exportBtn.innerHTML = originalText;
+                exportBtn.disabled = false;
+            } catch (error) {
+                console.error('Export error:', error);
+                alert('Error exporting Excel file: ' + error.message);
+                
+                const exportBtn = document.getElementById('exportExcelBtn');
+                exportBtn.innerHTML = '<i class="fas fa-file-excel"></i> Export Excel';
+                exportBtn.disabled = false;
+            }
+        }
+
+        async function exportPDF() {
+            if (currentStudents.length === 0) {
+                alert('No data to export. Please add some students first.');
+                return;
+            }
+
+            try {
+                const exportBtn = document.getElementById('exportPdfBtn');
+                const originalText = exportBtn.innerHTML;
+                exportBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Exporting...';
+                exportBtn.disabled = true;
+
+                const response = await fetch('@Url.Action("ExportStudentsPDF", "AdminReports")', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(currentStudents)
+                });
+
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `CSEDS_Students_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.pdf`;
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                } else {
+                    alert('Failed to export PDF file. Please try again.');
+                }
+
+                exportBtn.innerHTML = originalText;
+                exportBtn.disabled = false;
+            } catch (error) {
+                console.error('Export error:', error);
+                alert('Error exporting PDF file: ' + error.message);
+                
+                const exportBtn = document.getElementById('exportPdfBtn');
+                exportBtn.innerHTML = '<i class="fas fa-file-pdf"></i> Export PDF';
+                exportBtn.disabled = false;
+            }
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('CSEDS Student Management loaded successfully');
+            console.log('Total students loaded:', currentStudents.length);
+        });
+    </script>
+</body>
+</html>

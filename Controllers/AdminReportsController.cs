@@ -284,10 +284,10 @@ namespace TutorLiveMentor.Controllers
                 var content = package.GetAsByteArray();
 
                 // Set proper response headers for download
-                Response.Headers.Add("Content-Disposition", $"attachment; filename=\"{fileName}\"");
-                Response.Headers.Add("Cache-Control", "no-cache");
-                Response.Headers.Add("Pragma", "no-cache");
-                Response.Headers.Add("Expires", "0");
+                Response.Headers["Content-Disposition"] = $"attachment; filename=\"{fileName}\"";
+                Response.Headers["Cache-Control"] = "no-cache";
+                Response.Headers["Pragma"] = "no-cache";
+                Response.Headers["Expires"] = "0";
 
                 return File(content, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
             }
@@ -431,10 +431,10 @@ namespace TutorLiveMentor.Controllers
                 var content = stream.ToArray();
 
                 // Set proper response headers for download
-                Response.Headers.Add("Content-Disposition", $"attachment; filename=\"{fileName}\"");
-                Response.Headers.Add("Cache-Control", "no-cache");
-                Response.Headers.Add("Pragma", "no-cache");
-                Response.Headers.Add("Expires", "0");
+                Response.Headers["Content-Disposition"] = $"attachment; filename=\"{fileName}\"";
+                Response.Headers["Cache-Control"] = "no-cache";
+                Response.Headers["Pragma"] = "no-cache";
+                Response.Headers["Expires"] = "0";
 
                 return File(content, "application/pdf", fileName);
             }
@@ -710,6 +710,183 @@ namespace TutorLiveMentor.Controllers
                 document.Close();
 
                 var fileName = $"CSEDS_Enrollment_Report_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
+                var content = stream.ToArray();
+
+                return File(content, "application/pdf", fileName);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"PDF export error: {ex}");
+                return StatusCode(500, $"Error exporting to PDF: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Export students to Excel
+        /// </summary>
+        [HttpPost]
+        [IgnoreAntiforgeryToken]
+        public async Task<IActionResult> ExportStudentsExcel([FromBody] List<StudentDetailDto> studentsData)
+        {
+            var department = HttpContext.Session.GetString("AdminDepartment");
+            if (!IsCSEDSDepartment(department))
+                return Unauthorized();
+
+            try
+            {
+                if (studentsData == null || studentsData.Count == 0)
+                {
+                    return BadRequest("No student data to export");
+                }
+
+                // Create Excel file
+                ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+                using var package = new ExcelPackage();
+                var worksheet = package.Workbook.Worksheets.Add("CSEDS Students");
+
+                // Headers
+                worksheet.Cells[1, 1].Value = "Student ID";
+                worksheet.Cells[1, 2].Value = "Full Name";
+                worksheet.Cells[1, 3].Value = "Registration Number";
+                worksheet.Cells[1, 4].Value = "Email";
+                worksheet.Cells[1, 5].Value = "Year";
+                worksheet.Cells[1, 6].Value = "Department";
+                worksheet.Cells[1, 7].Value = "Total Enrollments";
+                worksheet.Cells[1, 8].Value = "Enrolled Subjects";
+
+                // Header styling
+                using (var range = worksheet.Cells[1, 1, 1, 8])
+                {
+                    range.Style.Font.Bold = true;
+                    range.Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+                    range.Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.LightBlue);
+                }
+
+                // Data
+                for (int i = 0; i < studentsData.Count; i++)
+                {
+                    var row = i + 2;
+                    var student = studentsData[i];
+                    
+                    worksheet.Cells[row, 1].Value = student.StudentId;
+                    worksheet.Cells[row, 2].Value = student.FullName;
+                    worksheet.Cells[row, 3].Value = student.RegdNumber;
+                    worksheet.Cells[row, 4].Value = student.Email;
+                    worksheet.Cells[row, 5].Value = student.Year;
+                    worksheet.Cells[row, 6].Value = student.Department;
+                    worksheet.Cells[row, 7].Value = student.TotalEnrollments;
+                    
+                    // Enrolled subjects as comma-separated list
+                    var subjects = student.EnrolledSubjects?.Select(s => $"{s.SubjectName} (Sem {s.Semester})").ToList() ?? new List<string>();
+                    worksheet.Cells[row, 8].Value = string.Join(", ", subjects);
+                }
+
+                // Auto-fit columns
+                worksheet.Cells.AutoFitColumns();
+
+                // Generate file
+                var fileName = $"CSEDS_Students_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
+                var content = package.GetAsByteArray();
+
+                // Set proper response headers for download
+                Response.Headers["Content-Disposition"] = $"attachment; filename=\"{fileName}\"";
+                Response.Headers["Cache-Control"] = "no-cache";
+                Response.Headers["Pragma"] = "no-cache";
+                Response.Headers["Expires"] = "0";
+
+                return File(content, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Excel export error: {ex}");
+                return StatusCode(500, $"Error exporting to Excel: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Export students to PDF
+        /// </summary>
+        [HttpPost]
+        [IgnoreAntiforgeryToken]
+        public async Task<IActionResult> ExportStudentsPDF([FromBody] List<StudentDetailDto> studentsData)
+        {
+            var department = HttpContext.Session.GetString("AdminDepartment");
+            if (!IsCSEDSDepartment(department))
+                return Unauthorized();
+
+            try
+            {
+                if (studentsData == null || studentsData.Count == 0)
+                {
+                    return BadRequest("No student data to export");
+                }
+
+                // Create PDF using iTextSharp
+                using var stream = new MemoryStream();
+                var document = new Document(PageSize.A4.Rotate(), 25, 25, 30, 30);
+                var writer = PdfWriter.GetInstance(document, stream);
+                
+                document.Open();
+                
+                // Title
+                var titleFont = FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 16);
+                var title = new Paragraph("CSEDS Department - Students Report", titleFont);
+                title.Alignment = Element.ALIGN_CENTER;
+                title.SpacingAfter = 20;
+                document.Add(title);
+
+                // Date
+                var dateFont = FontFactory.GetFont(FontFactory.HELVETICA, 10);
+                var dateText = new Paragraph($"Generated on: {DateTime.Now:yyyy-MM-dd HH:mm:ss}", dateFont);
+                dateText.Alignment = Element.ALIGN_RIGHT;
+                dateText.SpacingAfter = 20;
+                document.Add(dateText);
+
+                // Table
+                var table = new PdfPTable(7);
+                table.WidthPercentage = 100;
+                table.SetWidths(new float[] { 1.5f, 2.5f, 1.5f, 2.5f, 1f, 1f, 3f });
+
+                // Headers
+                var headerFont = FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 10);
+                table.AddCell(new PdfPCell(new Phrase("Student ID", headerFont)) { BackgroundColor = BaseColor.LIGHT_GRAY, Padding = 5 });
+                table.AddCell(new PdfPCell(new Phrase("Full Name", headerFont)) { BackgroundColor = BaseColor.LIGHT_GRAY, Padding = 5 });
+                table.AddCell(new PdfPCell(new Phrase("Reg No", headerFont)) { BackgroundColor = BaseColor.LIGHT_GRAY, Padding = 5 });
+                table.AddCell(new PdfPCell(new Phrase("Email", headerFont)) { BackgroundColor = BaseColor.LIGHT_GRAY, Padding = 5 });
+                table.AddCell(new PdfPCell(new Phrase("Year", headerFont)) { BackgroundColor = BaseColor.LIGHT_GRAY, Padding = 5 });
+                table.AddCell(new PdfPCell(new Phrase("Enrollments", headerFont)) { BackgroundColor = BaseColor.LIGHT_GRAY, Padding = 5 });
+                table.AddCell(new PdfPCell(new Phrase("Enrolled Subjects", headerFont)) { BackgroundColor = BaseColor.LIGHT_GRAY, Padding = 5 });
+
+                // Data
+                var cellFont = FontFactory.GetFont(FontFactory.HELVETICA, 8);
+                foreach (var student in studentsData)
+                {
+                    table.AddCell(new PdfPCell(new Phrase(student.StudentId ?? "", cellFont)) { Padding = 3 });
+                    table.AddCell(new PdfPCell(new Phrase(student.FullName ?? "", cellFont)) { Padding = 3 });
+                    table.AddCell(new PdfPCell(new Phrase(student.RegdNumber ?? "", cellFont)) { Padding = 3 });
+                    table.AddCell(new PdfPCell(new Phrase(student.Email ?? "", cellFont)) { Padding = 3 });
+                    table.AddCell(new PdfPCell(new Phrase(student.Year ?? "", cellFont)) { Padding = 3 });
+                    table.AddCell(new PdfPCell(new Phrase(student.TotalEnrollments.ToString(), cellFont)) { Padding = 3 });
+                    
+                    // Enrolled subjects
+                    var subjects = student.EnrolledSubjects?.Select(s => $"{s.SubjectName} (Sem {s.Semester})").ToList() ?? new List<string>();
+                    var subjectsText = string.Join(", ", subjects.Take(3)); // Limit to 3 subjects for PDF
+                    if (subjects.Count > 3) subjectsText += $" +{subjects.Count - 3} more";
+                    table.AddCell(new PdfPCell(new Phrase(subjectsText, cellFont)) { Padding = 3 });
+                }
+
+                document.Add(table);
+                
+                // Summary
+                var summaryFont = FontFactory.GetFont(FontFactory.HELVETICA_BOLD, 12);
+                var summary = new Paragraph($"\nTotal Students: {studentsData.Count}", summaryFont);
+                summary.Alignment = Element.ALIGN_CENTER;
+                summary.SpacingBefore = 20;
+                document.Add(summary);
+                
+                document.Close();
+
+                var fileName = $"CSEDS_Students_{DateTime.Now:yyyyMMdd_HHmmss}.pdf";
                 var content = stream.ToArray();
 
                 return File(content, "application/pdf", fileName);

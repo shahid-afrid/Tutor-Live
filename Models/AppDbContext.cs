@@ -60,7 +60,9 @@ namespace TutorLiveMentor.Models
                     AdminId = 1,
                     Email = "cseds@rgmcet.edu.in",
                     Password = "admin123",
-                    Department = "CSEDS"
+                    Department = "CSEDS",
+                    CreatedDate = new DateTime(2024, 1, 1),
+                    LastLogin = null
                 }
             );
         }

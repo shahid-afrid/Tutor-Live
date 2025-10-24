@@ -165,7 +165,7 @@
         /* Management Cards */
         .management-container {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 25px;
             margin-bottom: 30px;
         }
@@ -201,6 +201,10 @@
             background: linear-gradient(135deg, #ffc107, #fd7e14);
         }
 
+        .management-card.students-card::before {
+            background: linear-gradient(135deg, #9b59b6, #8e44ad);
+        }
+
         .management-card.assignment-card::before {
             background: linear-gradient(135deg, #6f42c1, #20c997);
         }
@@ -222,6 +226,7 @@
 
         .faculty-card .management-icon { color: #28a745; }
         .subject-card .management-icon { color: #ffc107; }
+        .students-card .management-icon { color: #9b59b6; }
         .assignment-card .management-icon { color: #6f42c1; }
         .report-card .management-icon { color: #17a2b8; }
 
@@ -551,6 +556,16 @@
                 <div class="management-desc">Create new Data Science subjects with semester details. Set year, semester, and date ranges for academic planning.</div>
                 <button class="glass-btn">
                     <i class="fas fa-plus"></i> Manage Subjects
+                </button>
+            </div>
+
+            <!-- Student Management -->
+            <div class="management-card students-card" onclick="window.location.href='@Url.Action("ManageCSEDSStudents", "Admin")'">
+                <i class="fas fa-user-graduate management-icon"></i>
+                <div class="management-title">Student Management</div>
+                <div class="management-desc">View and manage CSEDS student profiles and enrollments. Add new students and update their information.</div>
+                <button class="glass-btn">
+                    <i class="fas fa-graduation-cap"></i> Manage Students
                 </button>
             </div>
 

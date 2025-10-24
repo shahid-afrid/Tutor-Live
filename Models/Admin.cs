@@ -19,5 +19,9 @@ namespace TutorLiveMentor.Models
         [Required]
         [StringLength(50)]
         public string Department { get; set; } = string.Empty;
+
+        public DateTime CreatedDate { get; set; } = DateTime.Now;
+
+        public DateTime? LastLogin { get; set; }
     }
 }

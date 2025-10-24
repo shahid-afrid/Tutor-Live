@@ -350,7 +350,7 @@
             </div>
 
             <div class="form-group">
-                <label class="required">College Email (must end with @@rgmcet.edu.in)</label>
+                <label class="required">College Email (must end with @("@rgmcet.edu.in"))</label>
                 @Html.TextBoxFor(m => m.Email, new { type = "email", id = "email", @required = "required", oninput = "validateEmail(this)", placeholder = "yourname@@rgmcet.edu.in" })
                 <span class="validation-icon" id="emailIcon"></span>
                 <span id="emailError" class="real-time-error"></span>
