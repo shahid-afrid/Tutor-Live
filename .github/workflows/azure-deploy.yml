@@ -9,6 +9,7 @@ on:
 env:
   AZURE_WEBAPP_NAME: tutorlive-app
   DOTNET_VERSION: '8.0.x'
+  SOLUTION_PATH: 'TutorLiveMentor.sln'
   PROJECT_PATH: 'TutorLiveMentor10.csproj'
 
 jobs:
@@ -25,13 +26,13 @@ jobs:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
       - name: Restore dependencies
-        run: dotnet restore ${{ env.PROJECT_PATH }}
+        run: dotnet restore ${{ env.SOLUTION_PATH }}
 
       - name: Build application
-        run: dotnet build ${{ env.PROJECT_PATH }} --configuration Release --no-restore
+        run: dotnet build ${{ env.SOLUTION_PATH }} --configuration Release --no-restore
 
       - name: Run tests
-        run: dotnet test --no-build --verbosity normal --configuration Release
+        run: dotnet test ${{ env.SOLUTION_PATH }} --no-build --verbosity normal --configuration Release
         continue-on-error: true
 
       - name: Publish application
@@ -84,7 +85,7 @@ jobs:
         run: dotnet tool install --global dotnet-ef --version 8.0.*
 
       - name: Restore dependencies
-        run: dotnet restore ${{ env.PROJECT_PATH }}
+        run: dotnet restore ${{ env.SOLUTION_PATH }}
 
       - name: Build project for migrations
         run: dotnet build ${{ env.PROJECT_PATH }} --configuration Release --no-restore
