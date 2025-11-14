@@ -55,6 +55,10 @@ jobs:
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_CA1E078153BA42F09FBB4C3DB2CEF8D1 }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_DCD94700EE0F4566BE8F946740690404 }}
 
+    - name: Run Database Migrations
+          run: |
+                  dotnet tool install --global dotnet-ef
+                          dotnet ef database update --project TutorLiveMentor10.csproj --connection "Server=tcp:tutorlive-sql-server.database.windows.net,1433;Initial Catalog=TutorLiveMentorDB;User ID=sqladmin;Password=ShahidAfrid@2024;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
@@ -64,4 +68,5 @@ jobs:
           package: .
 
           
+
 
