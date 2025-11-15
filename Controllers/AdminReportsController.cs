@@ -418,7 +418,9 @@ namespace TutorLiveMentor.Controllers
                     table.AddCell(new PdfPCell(new Phrase(item.SubjectName ?? "", cellFont)) { Padding = 3 });
                     table.AddCell(new PdfPCell(new Phrase(item.FacultyName ?? "", cellFont)) { Padding = 3 });
                     table.AddCell(new PdfPCell(new Phrase(item.Semester ?? "", cellFont)) { Padding = 3 });
-                    var timeStr = item.EnrolledAt.ToString("yyyy-MM-dd HH:mm:ss.fff");
+                    // Convert UTC to local time and format with milliseconds
+                    var localTime = item.EnrolledAt.ToLocalTime();
+                    var timeStr = localTime.ToString("MM/dd/yyyy hh:mm:ss.fff tt");
                     table.AddCell(new PdfPCell(new Phrase(timeStr, cellFont)) { Padding = 3 });
                 }
 
@@ -848,9 +850,10 @@ namespace TutorLiveMentor.Controllers
                     
                     if (columns.EnrollmentTime && columnMapping.ContainsKey("EnrollmentTime"))
                     {
-                        // Format with milliseconds: yyyy-MM-dd HH:mm:ss.fff
+                        // Convert UTC to local time and format with milliseconds
+                        var localTime = item.EnrolledAt.ToLocalTime();
                         worksheet.Cells[row, columnMapping["EnrollmentTime"]].Value = 
-                            item.EnrolledAt.ToString("yyyy-MM-dd HH:mm:ss.fff");
+                            localTime.ToString("MM/dd/yyyy hh:mm:ss.fff tt");
                     }
                 }
 
@@ -984,7 +987,9 @@ namespace TutorLiveMentor.Controllers
                         table.AddCell(new PdfPCell(new Phrase(item.Semester ?? "", cellFont)) { Padding = 3 });
                     if (columns.EnrollmentTime)
                     {
-                        var timeStr = item.EnrolledAt.ToString("yyyy-MM-dd HH:mm:ss.fff");
+                        // Convert UTC to local time and format with milliseconds
+                        var localTime = item.EnrolledAt.ToLocalTime();
+                        var timeStr = localTime.ToString("MM/dd/yyyy hh:mm:ss.fff tt");
                         table.AddCell(new PdfPCell(new Phrase(timeStr, cellFont)) { Padding = 3 });
                     }
                 }
